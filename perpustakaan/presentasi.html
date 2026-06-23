@@ -1,0 +1,250 @@
+<!DOCTYPE html>
+<html lang="id">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>Presentasi - E-Library Manager</title>
+    <link href="https://fonts.googleapis.com/css2?family=Poppins:wght@300;400;600;700;800&display=swap" rel="stylesheet">
+    <style>
+        * { margin:0; padding:0; box-sizing:border-box; }
+        body { font-family:'Poppins',sans-serif; background:#0a0a1a; color:#fff; overflow:hidden; height:100vh; }
+        
+        .slide { position:absolute; top:0; left:0; width:100%; height:100%; display:flex; align-items:center; justify-content:center; opacity:0; transform:scale(0.95); transition:all 0.6s cubic-bezier(.4,0,.2,1); pointer-events:none; padding:60px; }
+        .slide.active { opacity:1; transform:scale(1); pointer-events:all; }
+        
+        .bg-gradient { position:fixed; top:0; left:0; width:100%; height:100%; z-index:-2; }
+        .bg-gradient::before { content:''; position:absolute; top:-50%; left:-50%; width:200%; height:200%; background:radial-gradient(circle at 30% 40%, rgba(99,102,241,0.15) 0%, transparent 50%), radial-gradient(circle at 70% 60%, rgba(236,72,153,0.1) 0%, transparent 50%), radial-gradient(circle at 50% 50%, rgba(14,165,233,0.08) 0%, transparent 60%); animation:bgMove 20s ease-in-out infinite; }
+        @keyframes bgMove { 0%,100%{transform:translate(0,0)} 50%{transform:translate(-3%,-3%)} }
+        
+        .orb { position:fixed; border-radius:50%; filter:blur(80px); z-index:-1; animation:float 8s ease-in-out infinite; }
+        .orb-1 { width:300px; height:300px; background:rgba(99,102,241,0.2); top:10%; left:10%; }
+        .orb-2 { width:250px; height:250px; background:rgba(236,72,153,0.15); bottom:10%; right:10%; animation-delay:-4s; }
+        .orb-3 { width:200px; height:200px; background:rgba(14,165,233,0.15); top:50%; right:30%; animation-delay:-2s; }
+        @keyframes float { 0%,100%{transform:translateY(0)} 50%{transform:translateY(-30px)} }
+        
+        .glass { background:rgba(255,255,255,0.05); backdrop-filter:blur(20px); border:1px solid rgba(255,255,255,0.1); border-radius:24px; padding:50px; max-width:900px; width:100%; }
+        
+        .slide-number { position:fixed; bottom:30px; right:40px; font-size:14px; color:rgba(255,255,255,0.4); z-index:100; }
+        
+        h1 { font-size:3.2em; font-weight:800; background:linear-gradient(135deg,#818cf8,#e879f9,#38bdf8); -webkit-background-clip:text; -webkit-text-fill-color:transparent; line-height:1.2; margin-bottom:10px; }
+        h2 { font-size:2em; font-weight:700; color:#c4b5fd; margin-bottom:25px; }
+        h3 { font-size:1.1em; font-weight:300; color:rgba(255,255,255,0.6); margin-bottom:30px; }
+        
+        .badge { display:inline-block; padding:6px 16px; border-radius:20px; font-size:0.75em; font-weight:600; margin:4px; }
+        .badge-purple { background:rgba(139,92,246,0.2); color:#c4b5fd; border:1px solid rgba(139,92,246,0.3); }
+        .badge-pink { background:rgba(236,72,153,0.2); color:#f9a8d4; border:1px solid rgba(236,72,153,0.3); }
+        .badge-blue { background:rgba(14,165,233,0.2); color:#7dd3fc; border:1px solid rgba(14,165,233,0.3); }
+        .badge-green { background:rgba(34,197,94,0.2); color:#86efac; border:1px solid rgba(34,197,94,0.3); }
+        
+        .feature-grid { display:grid; grid-template-columns:1fr 1fr; gap:16px; margin-top:20px; }
+        .feature-card { background:rgba(255,255,255,0.03); border:1px solid rgba(255,255,255,0.08); border-radius:16px; padding:20px; transition:all 0.3s; }
+        .feature-card:hover { background:rgba(255,255,255,0.08); transform:translateY(-3px); border-color:rgba(139,92,246,0.3); }
+        .feature-card .icon { font-size:1.8em; margin-bottom:8px; }
+        .feature-card h4 { font-size:0.95em; color:#e2e8f0; margin-bottom:6px; }
+        .feature-card p { font-size:0.78em; color:rgba(255,255,255,0.5); line-height:1.5; }
+        
+        .ds-item { display:flex; align-items:flex-start; gap:16px; margin-bottom:18px; padding:14px; background:rgba(255,255,255,0.03); border-radius:12px; border-left:3px solid; }
+        .ds-item.arr { border-color:#818cf8; }
+        .ds-item.ll { border-color:#e879f9; }
+        .ds-item.stk { border-color:#38bdf8; }
+        .ds-item.que { border-color:#34d399; }
+        .ds-item .ds-icon { font-size:1.5em; min-width:40px; text-align:center; }
+        .ds-item h4 { font-size:0.9em; color:#e2e8f0; }
+        .ds-item p { font-size:0.75em; color:rgba(255,255,255,0.5); margin-top:4px; }
+        
+        .nav-controls { position:fixed; bottom:25px; left:50%; transform:translateX(-50%); display:flex; gap:12px; z-index:100; }
+        .nav-btn { width:44px; height:44px; border-radius:50%; border:1px solid rgba(255,255,255,0.15); background:rgba(255,255,255,0.05); backdrop-filter:blur(10px); color:#fff; font-size:18px; cursor:pointer; display:flex; align-items:center; justify-content:center; transition:all 0.3s; }
+        .nav-btn:hover { background:rgba(139,92,246,0.3); border-color:rgba(139,92,246,0.5); }
+        
+        .progress-bar { position:fixed; top:0; left:0; height:3px; background:linear-gradient(90deg,#818cf8,#e879f9,#38bdf8); z-index:100; transition:width 0.4s ease; }
+        
+        .list-styled li { margin-bottom:10px; padding-left:8px; font-size:0.85em; color:rgba(255,255,255,0.7); line-height:1.6; }
+        .list-styled li strong { color:#c4b5fd; }
+        
+        .arch-flow { display:flex; align-items:center; justify-content:center; gap:12px; margin:25px 0; flex-wrap:wrap; }
+        .arch-box { padding:14px 22px; border-radius:12px; font-weight:600; font-size:0.85em; text-align:center; }
+        .arch-arrow { font-size:1.4em; color:rgba(255,255,255,0.3); }
+        .arch-model { background:rgba(99,102,241,0.2); border:1px solid rgba(99,102,241,0.4); color:#a5b4fc; }
+        .arch-view { background:rgba(236,72,153,0.2); border:1px solid rgba(236,72,153,0.4); color:#f9a8d4; }
+        .arch-ctrl { background:rgba(14,165,233,0.2); border:1px solid rgba(14,165,233,0.4); color:#7dd3fc; }
+        
+        .thank-you h1 { font-size:4em; }
+        .contact-info { margin-top:30px; display:flex; gap:20px; justify-content:center; flex-wrap:wrap; }
+        .contact-item { padding:10px 20px; background:rgba(255,255,255,0.05); border:1px solid rgba(255,255,255,0.1); border-radius:12px; font-size:0.85em; color:rgba(255,255,255,0.6); }
+        
+        @keyframes fadeUp { from{opacity:0;transform:translateY(30px)} to{opacity:1;transform:translateY(0)} }
+        .slide.active .anim { animation:fadeUp 0.6s ease forwards; }
+        .slide.active .anim-d1 { animation-delay:0.1s; opacity:0; }
+        .slide.active .anim-d2 { animation-delay:0.2s; opacity:0; }
+        .slide.active .anim-d3 { animation-delay:0.3s; opacity:0; }
+        .slide.active .anim-d4 { animation-delay:0.4s; opacity:0; }
+        .slide.active .anim-d5 { animation-delay:0.5s; opacity:0; }
+    </style>
+</head>
+<body>
+    <div class="bg-gradient"></div>
+    <div class="orb orb-1"></div>
+    <div class="orb orb-2"></div>
+    <div class="orb orb-3"></div>
+    <div class="progress-bar" id="progress"></div>
+
+    <!-- SLIDE 1: JUDUL -->
+    <div class="slide active" id="slide-1">
+        <div class="glass" style="text-align:center;">
+            <div class="anim anim-d1" style="margin-bottom:20px;">
+                <span class="badge badge-purple">📚 Proyek Akhir</span>
+                <span class="badge badge-pink">MVC Architecture</span>
+                <span class="badge badge-blue">Data Structures</span>
+            </div>
+            <h1 class="anim anim-d2">E-LIBRARY<br>MANAGER</h1>
+            <h3 class="anim anim-d3">Sistem Manajemen Perpustakaan Digital Berbasis Web Modern</h3>
+            <div class="anim anim-d4" style="color:rgba(255,255,255,0.4); font-size:0.75em; line-height:1.8; margin-top:10px;">
+                <strong style="color:#c4b5fd;">Ichsan Syarief Albadar</strong> (202551157) &nbsp;•&nbsp;
+                <strong style="color:#f9a8d4;">Muhammad Angling Gading</strong> (202551143)<br>
+                <strong style="color:#7dd3fc;">Muhammad Miftahul Fajri</strong> (202551152) &nbsp;•&nbsp;
+                <strong style="color:#86efac;">Feryan Dinata Prakiswara</strong> (202551146)<br>
+                <strong style="color:#fcd34d;">Abdullahi Muhammad</strong> (202551160)
+            </div>
+            <p class="anim anim-d5" style="color:rgba(255,255,255,0.3); font-size:0.75em; margin-top:12px;">Tekan ➡️ atau klik tombol navigasi untuk melanjutkan</p>
+        </div>
+    </div>
+
+    <!-- SLIDE 2: LATAR BELAKANG -->
+    <div class="slide" id="slide-2">
+        <div class="glass">
+            <h2 class="anim anim-d1">🎯 Latar Belakang & Tujuan</h2>
+            <ul class="list-styled">
+                <li class="anim anim-d2"><strong>Transformasi Digital:</strong> Perpustakaan konvensional membutuhkan sistem modern yang efisien, cepat, dan mudah diakses secara digital.</li>
+                <li class="anim anim-d3"><strong>Integrasi Teori & Praktik:</strong> Mengimplementasikan konsep Struktur Data (Array, Stack, Queue, Linked List) dan Arsitektur MVC ke dalam aplikasi nyata.</li>
+                <li class="anim anim-d4"><strong>Pengalaman Pengguna Premium:</strong> Membangun antarmuka dengan desain <em>Glassmorphism</em> yang elegan dan interaktif.</li>
+                <li class="anim anim-d5"><strong>Koleksi Hybrid:</strong> Mendukung pengelolaan buku fisik sekaligus akses koleksi digital (E-Book & E-Journal).</li>
+            </ul>
+        </div>
+    </div>
+
+    <!-- SLIDE 3: ARSITEKTUR MVC -->
+    <div class="slide" id="slide-3">
+        <div class="glass">
+            <h2 class="anim anim-d1">⚙️ Arsitektur Sistem (MVC)</h2>
+            <div class="arch-flow anim anim-d2">
+                <div class="arch-box arch-model">📦 Model<br><small>AppModel.js</small></div>
+                <div class="arch-arrow">⇄</div>
+                <div class="arch-box arch-ctrl">🔗 Controller<br><small>AppController.js</small></div>
+                <div class="arch-arrow">⇄</div>
+                <div class="arch-box arch-view">🖥️ View<br><small>AppView.js</small></div>
+            </div>
+            <div class="feature-grid">
+                <div class="feature-card anim anim-d3"><div class="icon">📦</div><h4>Model</h4><p>Mengelola logika data, struktur data kustom (Array, Stack, Queue, Linked List), dan aturan bisnis aplikasi.</p></div>
+                <div class="feature-card anim anim-d3"><div class="icon">🖥️</div><h4>View</h4><p>Bertanggung jawab merender tampilan DOM, desain Glassmorphism, dan menangkap event pengguna.</p></div>
+                <div class="feature-card anim anim-d4"><div class="icon">🔗</div><h4>Controller</h4><p>Menjembatani aksi pengguna dari View ke Model dan memperbarui View dengan data terbaru.</p></div>
+                <div class="feature-card anim anim-d4"><div class="icon">🌐</div><h4>Teknologi</h4><p>HTML5, CSS3 Vanilla, JavaScript ES6+ — tanpa framework, murni kode asli.</p></div>
+            </div>
+        </div>
+    </div>
+
+    <!-- SLIDE 4: STRUKTUR DATA -->
+    <div class="slide" id="slide-4">
+        <div class="glass">
+            <h2 class="anim anim-d1">🧬 Implementasi Struktur Data</h2>
+            <div class="ds-item arr anim anim-d2"><div class="ds-icon">📊</div><div><h4>Array (Larik)</h4><p>Menyimpan katalog 32 buku fisik + 8 E-Book + 8 E-Journal. Digunakan untuk pencarian dan filter kategori secara dinamis.</p></div></div>
+            <div class="ds-item ll anim anim-d3"><div class="ds-icon">🔗</div><div><h4>Linked List (Senarai Berantai)</h4><p>Mengelola daftar buku yang sedang dipinjam secara aktif. Efisien untuk operasi tambah dan hapus node secara dinamis.</p></div></div>
+            <div class="ds-item stk anim anim-d4"><div class="ds-icon">📚</div><div><h4>Stack (Tumpukan — LIFO)</h4><p>Fitur "Undo / Batal" — mengembalikan data edit terakhir jika petugas salah memasukkan informasi peminjam.</p></div></div>
+            <div class="ds-item que anim anim-d5"><div class="ds-icon">👥</div><div><h4>Queue (Antrean — FIFO)</h4><p>Sistem reservasi buku — peminjam pertama yang mendaftar akan dilayani terlebih dahulu secara otomatis.</p></div></div>
+        </div>
+    </div>
+
+    <!-- SLIDE 5: FITUR UTAMA -->
+    <div class="slide" id="slide-5">
+        <div class="glass">
+            <h2 class="anim anim-d1">🚀 Fitur Utama Aplikasi</h2>
+            <div class="feature-grid">
+                <div class="feature-card anim anim-d2"><div class="icon">🔍</div><h4>Pencarian & Filter Cerdas</h4><p>Cari buku berdasarkan judul, penulis, atau filter 4 kategori: Sejarah, Novel, Pengembangan Diri, Sains.</p></div>
+                <div class="feature-card anim anim-d2"><div class="icon">📋</div><h4>Manajemen Peminjaman</h4><p>Form pinjam, edit data peminjam, dan daftar aktif — semuanya dalam satu layar terpusat.</p></div>
+                <div class="feature-card anim anim-d3"><div class="icon">📱</div><h4>E-Book & E-Journal</h4><p>Koleksi digital dengan pratinjau Bab 1 dan abstrak teori yang bisa langsung dibaca dalam popup.</p></div>
+                <div class="feature-card anim anim-d3"><div class="icon">🤖</div><h4>Asisten AI Pustakawan</h4><p>Chatbot cerdas berbasis Generative AI yang bisa menjawab pertanyaan dan merekomendasikan buku.</p></div>
+                <div class="feature-card anim anim-d4"><div class="icon">👤</div><h4>Profil Petugas</h4><p>Formulir identitas penjaga shift hari ini, terpisah dari sistem peminjaman agar lebih terorganisir.</p></div>
+                <div class="feature-card anim anim-d4"><div class="icon">🎧</div><h4>Koleksi Audio Visual</h4><p>Galeri video dokumenter dan podcast edukasi yang bisa didengarkan langsung dari platform.</p></div>
+            </div>
+        </div>
+    </div>
+
+    <!-- SLIDE 6: DEMO -->
+    <div class="slide" id="slide-6">
+        <div class="glass" style="text-align:center;">
+            <h2 class="anim anim-d1">🖥️ Live Demo</h2>
+            <h3 class="anim anim-d2" style="margin-bottom:40px;">Saatnya melihat aplikasi berjalan secara langsung!</h3>
+            <div class="anim anim-d3" style="font-size:5em; margin-bottom:30px;">🚀</div>
+            <p class="anim anim-d4" style="color:rgba(255,255,255,0.5); font-size:0.9em;">Buka file <strong style="color:#c4b5fd;">index.html</strong> di browser untuk mendemonstrasikan fitur-fitur berikut:</p>
+            <div style="display:flex; gap:10px; justify-content:center; flex-wrap:wrap; margin-top:20px;">
+                <span class="badge badge-purple anim anim-d4">Login Sistem</span>
+                <span class="badge badge-pink anim anim-d4">Pencarian Buku</span>
+                <span class="badge badge-blue anim anim-d5">Pinjam & Edit</span>
+                <span class="badge badge-green anim anim-d5">Undo (Stack)</span>
+                <span class="badge badge-purple anim anim-d5">Baca E-Book</span>
+                <span class="badge badge-pink anim anim-d5">Chat AI</span>
+            </div>
+        </div>
+    </div>
+
+    <!-- SLIDE 7: KESIMPULAN -->
+    <div class="slide" id="slide-7">
+        <div class="glass">
+            <h2 class="anim anim-d1">📝 Kesimpulan</h2>
+            <ul class="list-styled">
+                <li class="anim anim-d2"><strong>Integrasi Teori:</strong> Berhasil mengimplementasikan 4 struktur data (Array, Linked List, Stack, Queue) dan arsitektur MVC ke dalam satu aplikasi web yang fungsional.</li>
+                <li class="anim anim-d3"><strong>Desain Premium:</strong> Antarmuka Glassmorphism dengan animasi halus memberikan pengalaman pengguna (UX) yang sangat menawan dan modern.</li>
+                <li class="anim anim-d4"><strong>Fitur Komprehensif:</strong> Sistem mencakup pengelolaan buku fisik, koleksi digital, profil petugas, dan Asisten AI — menjadikannya solusi perpustakaan yang lengkap.</li>
+                <li class="anim anim-d5"><strong>Pengembangan:</strong> Dapat ditingkatkan dengan backend (Node.js/PHP) dan database (MySQL/Firebase) untuk persistensi data permanen.</li>
+            </ul>
+        </div>
+    </div>
+
+    <!-- SLIDE 8: TERIMA KASIH -->
+    <div class="slide" id="slide-8">
+        <div class="glass thank-you" style="text-align:center;">
+            <div class="anim anim-d1" style="font-size:3em; margin-bottom:20px;">🙏</div>
+            <h1 class="anim anim-d2">Terima Kasih!</h1>
+            <h3 class="anim anim-d3" style="margin-top:10px;">Ada Pertanyaan?</h3>
+            <div class="contact-info anim anim-d4">
+                <div class="contact-item">📚 E-Library Manager v1.0</div>
+                <div class="contact-item">🌐 Frontend-Only (HTML + CSS + JS)</div>
+                <div class="contact-item">🧬 MVC + Data Structures</div>
+            </div>
+        </div>
+    </div>
+
+    <!-- NAVIGATION -->
+    <div class="nav-controls">
+        <button class="nav-btn" id="prev-btn">◀</button>
+        <button class="nav-btn" id="next-btn">▶</button>
+    </div>
+    <div class="slide-number" id="slide-num">1 / 8</div>
+
+    <script>
+        const slides = document.querySelectorAll('.slide');
+        const progress = document.getElementById('progress');
+        const slideNum = document.getElementById('slide-num');
+        let current = 0;
+        const total = slides.length;
+
+        function goTo(n) {
+            if (n < 0 || n >= total) return;
+            slides[current].classList.remove('active');
+            current = n;
+            slides[current].classList.add('active');
+            progress.style.width = ((current + 1) / total * 100) + '%';
+            slideNum.textContent = (current + 1) + ' / ' + total;
+        }
+
+        document.getElementById('prev-btn').addEventListener('click', () => goTo(current - 1));
+        document.getElementById('next-btn').addEventListener('click', () => goTo(current + 1));
+
+        document.addEventListener('keydown', (e) => {
+            if (e.key === 'ArrowRight' || e.key === ' ') { e.preventDefault(); goTo(current + 1); }
+            if (e.key === 'ArrowLeft') goTo(current - 1);
+        });
+
+        goTo(0);
+    </script>
+</body>
+</html>

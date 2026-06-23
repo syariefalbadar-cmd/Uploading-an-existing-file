@@ -1,0 +1,304 @@
+<!DOCTYPE html>
+<html lang="id">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>E-LIBRARY MANAGER</title>
+    <meta name="description" content="Sistem manajemen perpustakaan premium dengan struktur data khusus dan arsitektur MVC.">
+    <link href="https://fonts.googleapis.com/css2?family=Inter:wght@300;400;500;600;700&display=swap" rel="stylesheet">
+    <link rel="stylesheet" href="css/style.css">
+</head>
+<body>
+    <div id="app">
+        <!-- Animasi Latar Belakang -->
+        <div class="bg-shapes">
+            <div class="shape shape-1"></div>
+            <div class="shape shape-2"></div>
+            <div class="shape shape-3"></div>
+        </div>
+
+        <!-- Notifikasi (Toast) -->
+        <div id="toast" class="toast hidden"></div>
+
+        <!-- Tampilan Login -->
+        <section id="login-view" class="view active">
+            <div class="glass-panel login-panel">
+                <div class="login-header">
+                    <div class="logo-icon">📚</div>
+                    <h1>Selamat Datang</h1>
+                    <p>E-LIBRARY MANAGER</p>
+                </div>
+                <form id="login-form">
+                    <div class="input-group">
+                        <label for="username">Nama Pengguna (Username)</label>
+                        <input type="text" id="username" required autocomplete="off" placeholder="Contoh: admin">
+                    </div>
+                    <div class="input-group">
+                        <label for="password">Kata Sandi (Password)</label>
+                        <input type="password" id="password" required placeholder="Contoh: admin">
+                    </div>
+                    <button type="submit" class="btn btn-primary btn-block">Masuk</button>
+                </form>
+            </div>
+        </section>
+
+        <!-- Tampilan Dashboard -->
+        <section id="dashboard-view" class="view hidden">
+            <!-- Sidebar Navigation -->
+            <aside class="sidebar glass-panel">
+                <div class="nav-brand">
+                    <span class="logo-icon-small">📚</span>
+                    <h2>E-LIBRARY</h2>
+                </div>
+                
+                <div class="nav-menu">
+                    <div class="menu-label">Katalog Digital</div>
+                    <button class="nav-link active" data-target="katalog-buku">Katalog Buku Fisik</button>
+                    <button class="nav-link" data-target="katalog-ebook">E-Book (Digital)</button>
+                    <button class="nav-link" data-target="katalog-ejournal">E-Journal & Artikel</button>
+                    <button class="nav-link" data-target="katalog-audio">Koleksi Audio Visual</button>
+                    
+                    <div class="menu-label">Petugas Perpustakaan</div>
+                    <button class="nav-link" data-target="petugas-dashboard">Profil Petugas</button>
+                    
+                    <div class="menu-label">Layanan Interaktif</div>
+                    <button class="nav-link" data-target="tanya-pustakawan">Tanya Pustakawan</button>
+                </div>
+                
+                <div class="sidebar-footer">
+                    <span id="user-display" class="user-display">Halo, Pengguna</span>
+                    <button id="logout-btn" class="btn btn-secondary btn-sm btn-block" style="margin-top: 10px;">Keluar</button>
+                </div>
+            </aside>
+
+            <!-- Main Content Area -->
+            <main class="main-content">
+                
+                <!-- Tab: Katalog Buku Fisik (Default) -->
+                <div id="katalog-buku" class="tab-content active">
+                    <header class="action-bar glass-panel">
+                        <div class="search-box">
+                            <input type="text" id="search-input" placeholder="Kotak Pencarian: Cari buku, e-book, atau e-journal...">
+                            <select id="category-filter" class="custom-select">
+                                <option value="">Semua Kategori</option>
+                                <option value="Sejarah">Sejarah</option>
+                                <option value="Novel">Novel</option>
+                                <option value="Pengembangan Diri">Pengembangan Diri</option>
+                                <option value="Sains">Sains</option>
+                            </select>
+                            <button id="search-btn" class="btn btn-primary">Cari</button>
+                        </div>
+                    </header>
+                    
+                    <div class="grid-layout">
+                        <div class="glass-panel catalog-section">
+                            <h3>Katalog Buku Fisik</h3>
+                            <div id="books-container" class="books-grid">
+                                <!-- Buku dimuat via JS -->
+                            </div>
+                        </div>
+
+                        <div class="side-panel">
+                            <!-- Aksi Manajemen Peminjaman -->
+                            <div class="glass-panel action-buttons-panel" style="display:flex; flex-direction:column; gap:10px;">
+                                <h3>Manajemen Peminjaman</h3>
+                                <button id="undo-btn" class="btn btn-outline" title="Batalkan Edit Terakhir (Stack)">↺ Batal (Undo) Edit Terakhir</button>
+                                <button id="process-queue-btn" class="btn btn-outline" title="Proses Reservasi (Queue)">Proses Antrean Reservasi</button>
+                            </div>
+
+                            <!-- Form Peminjaman Baru (Modal/Panel) -->
+                            <div class="glass-panel borrow-section hidden" id="borrow-panel">
+                                <h3>Form Peminjaman Baru</h3>
+                                <form id="borrow-form">
+                                    <input type="hidden" id="borrow-book-id">
+                                    <p id="borrow-book-title" style="margin-bottom: 15px; font-weight: bold; color: var(--primary-color);"></p>
+                                    <div class="input-group">
+                                        <label for="new-borrower">Nama Peminjam</label>
+                                        <input type="text" id="new-borrower" required placeholder="Masukkan nama peminjam">
+                                    </div>
+                                    <div class="input-group">
+                                        <label for="new-borrow-date">Tanggal Pinjam</label>
+                                        <input type="date" id="new-borrow-date" required>
+                                    </div>
+                                    <div class="input-group">
+                                        <label for="new-return-date">Tanggal Kembali</label>
+                                        <input type="date" id="new-return-date" required>
+                                    </div>
+                                    <div class="form-actions">
+                                        <button type="button" id="cancel-borrow-btn" class="btn btn-secondary">Batal</button>
+                                        <button type="submit" class="btn btn-primary">Pinjamkan</button>
+                                    </div>
+                                </form>
+                            </div>
+
+                            <!-- Form Edit Peminjaman -->
+                            <div class="glass-panel edit-section">
+                                <h3>Edit Data Peminjaman</h3>
+                                <form id="edit-form" class="hidden">
+                                    <input type="hidden" id="edit-book-id">
+                                    <div class="input-group">
+                                        <label for="edit-borrower">Nama Peminjam</label>
+                                        <input type="text" id="edit-borrower" required>
+                                    </div>
+                                    <div class="input-group">
+                                        <label for="edit-borrow-date">Tanggal Pinjam</label>
+                                        <input type="date" id="edit-borrow-date" required>
+                                    </div>
+                                    <div class="input-group">
+                                        <label for="edit-return-date">Tanggal Kembali</label>
+                                        <input type="date" id="edit-return-date" required>
+                                    </div>
+                                    <div class="form-actions">
+                                        <button type="button" id="cancel-edit-btn" class="btn btn-secondary">Batal</button>
+                                        <button type="submit" class="btn btn-primary">Simpan</button>
+                                    </div>
+                                </form>
+                                <div id="edit-placeholder" class="placeholder-text">
+                                    Pilih data peminjaman di bawah untuk diedit.
+                                </div>
+                            </div>
+
+                            <div class="glass-panel list-section">
+                                <h3>Buku Sedang Dipinjam (Linked List)</h3>
+                                <ul id="borrowed-list" class="item-list">
+                                    <!-- Data Peminjaman dimuat via JS -->
+                                </ul>
+                            </div>
+                            
+                            <div class="glass-panel queue-section">
+                                <h3>Antrean Reservasi (Queue)</h3>
+                                <ul id="queue-list" class="item-list">
+                                    <!-- Data Antrean dimuat via JS -->
+                                </ul>
+                            </div>
+                        </div>
+                    </div>
+                </div>
+
+                <!-- Tab: E-Book (Digital) -->
+                <div id="katalog-ebook" class="tab-content hidden">
+                    <div class="glass-panel catalog-section">
+                        <h3>E-Book (Digital)</h3>
+                        <p class="text-muted">Koleksi buku digital yang dapat diunduh dan dibaca langsung.</p>
+                        <div class="books-grid" style="margin-top:20px;">
+                            <div class="book-card"><div class="book-icon">📱</div><div class="book-title ebook-title">Pemrograman JavaScript Dasar</div><div class="book-author">E-Book PDF</div><button class="btn btn-primary btn-sm btn-block btn-read-ebook" style="margin-top: 10px;">Baca Sekarang</button></div>
+                            <div class="book-card"><div class="book-icon">📱</div><div class="book-title ebook-title">Desain UI/UX Modern</div><div class="book-author">E-Book EPUB</div><button class="btn btn-primary btn-sm btn-block btn-read-ebook" style="margin-top: 10px;">Baca Sekarang</button></div>
+                            <div class="book-card"><div class="book-icon">📱</div><div class="book-title ebook-title">Belajar Python untuk Pemula</div><div class="book-author">E-Book PDF</div><button class="btn btn-primary btn-sm btn-block btn-read-ebook" style="margin-top: 10px;">Baca Sekarang</button></div>
+                            <div class="book-card"><div class="book-icon">📱</div><div class="book-title ebook-title">Mahir React.js dalam 7 Hari</div><div class="book-author">E-Book PDF</div><button class="btn btn-primary btn-sm btn-block btn-read-ebook" style="margin-top: 10px;">Baca Sekarang</button></div>
+                            <div class="book-card"><div class="book-icon">📱</div><div class="book-title ebook-title">Panduan Lengkap CSS Grid & Flexbox</div><div class="book-author">E-Book EPUB</div><button class="btn btn-primary btn-sm btn-block btn-read-ebook" style="margin-top: 10px;">Baca Sekarang</button></div>
+                            <div class="book-card"><div class="book-icon">📱</div><div class="book-title ebook-title">Struktur Data dengan C++</div><div class="book-author">E-Book PDF</div><button class="btn btn-primary btn-sm btn-block btn-read-ebook" style="margin-top: 10px;">Baca Sekarang</button></div>
+                            <div class="book-card"><div class="book-icon">📱</div><div class="book-title ebook-title">Machine Learning untuk Analisis Data</div><div class="book-author">E-Book PDF</div><button class="btn btn-primary btn-sm btn-block btn-read-ebook" style="margin-top: 10px;">Baca Sekarang</button></div>
+                            <div class="book-card"><div class="book-icon">📱</div><div class="book-title ebook-title">Pengantar Basis Data SQL</div><div class="book-author">E-Book PDF</div><button class="btn btn-primary btn-sm btn-block btn-read-ebook" style="margin-top: 10px;">Baca Sekarang</button></div>
+                        </div>
+                    </div>
+                </div>
+
+                <!-- Tab: E-Journal -->
+                <div id="katalog-ejournal" class="tab-content hidden">
+                    <div class="glass-panel catalog-section">
+                        <h3>E-Journal & Artikel Ilmiah</h3>
+                        <p class="text-muted">Akses ke jurnal akademik dan artikel riset terbaru.</p>
+                        <div class="item-list" style="margin-top:20px;">
+                            <div class="list-item"><div class="item-details"><h4 class="journal-title">Implementasi Struktur Data pada Web</h4><p>Jurnal Ilmu Komputer - Vol 12 No 3</p></div><button class="btn btn-outline btn-sm btn-read-journal">Unduh PDF</button></div>
+                            <div class="list-item"><div class="item-details"><h4 class="journal-title">Penerapan MVC dalam Javascript</h4><p>Jurnal Rekayasa Perangkat Lunak - Vol 5 No 1</p></div><button class="btn btn-outline btn-sm btn-read-journal">Unduh PDF</button></div>
+                            <div class="list-item"><div class="item-details"><h4 class="journal-title">Analisis Algoritma Pencarian Teks</h4><p>Jurnal Teknologi Informasi - Vol 8 No 2</p></div><button class="btn btn-outline btn-sm btn-read-journal">Unduh PDF</button></div>
+                            <div class="list-item"><div class="item-details"><h4 class="journal-title">Keamanan Sistem Basis Data di Era Cloud</h4><p>Jurnal Cyber Security - Vol 3 No 4</p></div><button class="btn btn-outline btn-sm btn-read-journal">Unduh PDF</button></div>
+                            <div class="list-item"><div class="item-details"><h4 class="journal-title">Perbandingan Framework Frontend Modern</h4><p>Jurnal Web Development - Vol 2 No 1</p></div><button class="btn btn-outline btn-sm btn-read-journal">Unduh PDF</button></div>
+                            <div class="list-item"><div class="item-details"><h4 class="journal-title">Optimasi Kueri pada RDBMS</h4><p>Jurnal Sistem Informasi - Vol 10 No 2</p></div><button class="btn btn-outline btn-sm btn-read-journal">Unduh PDF</button></div>
+                            <div class="list-item"><div class="item-details"><h4 class="journal-title">Kecerdasan Buatan dalam Aplikasi Medis</h4><p>Jurnal AI Nusantara - Vol 4 No 3</p></div><button class="btn btn-outline btn-sm btn-read-journal">Unduh PDF</button></div>
+                            <div class="list-item"><div class="item-details"><h4 class="journal-title">Dampak UI/UX Terhadap Retensi Pengguna Web</h4><p>Jurnal HCI Indonesia - Vol 6 No 1</p></div><button class="btn btn-outline btn-sm btn-read-journal">Unduh PDF</button></div>
+                        </div>
+                    </div>
+                </div>
+
+                <!-- Tab: Audio Visual -->
+                <div id="katalog-audio" class="tab-content hidden">
+                    <div class="glass-panel catalog-section">
+                        <h3>Koleksi Audio Visual</h3>
+                        <p class="text-muted">Materi pembelajaran dalam format video dan podcast.</p>
+                        <div class="books-grid" style="margin-top:20px;">
+                            <div class="book-card">
+                                <div class="book-icon">🎬</div>
+                                <div class="book-title">Video Dokumenter: Sejarah Internet</div>
+                                <div class="book-author">MP4 Video (45 Menit)</div>
+                                <button class="btn btn-primary btn-sm btn-block" style="margin-top: 10px;">Tonton</button>
+                            </div>
+                            <div class="book-card">
+                                <div class="book-icon">🎧</div>
+                                <div class="book-title">Podcast: Obrolan IT Masa Kini</div>
+                                <div class="book-author">Audio MP3 (30 Menit)</div>
+                                <button class="btn btn-primary btn-sm btn-block" style="margin-top: 10px;">Dengarkan</button>
+                            </div>
+                        </div>
+                    </div>
+                </div>
+
+                <!-- Tab: Profil Petugas -->
+                <div id="petugas-dashboard" class="tab-content hidden">
+                    <div class="glass-panel catalog-section" style="max-width: 600px; margin: 0 auto;">
+                        <h3>Identitas Penjaga Hari Ini</h3>
+                        <p class="text-muted" style="margin-bottom: 20px;">Silakan isi atau perbarui identitas petugas perpustakaan yang sedang bertugas.</p>
+                        
+                        <div class="profile-info" style="padding: 20px; background: rgba(0,0,0,0.2); border-radius: 8px;">
+                            <form id="petugas-form">
+                                <div class="input-group">
+                                    <label for="petugas-nama">Nama Lengkap</label>
+                                    <input type="text" id="petugas-nama" value="Pengguna Aktif" required>
+                                </div>
+                                <div class="input-group">
+                                    <label for="petugas-shift">Shift Jaga</label>
+                                    <select id="petugas-shift" class="custom-select" style="width: 100%;" required>
+                                        <option value="Pagi (08:00 - 14:00)">Pagi (08:00 - 14:00)</option>
+                                        <option value="Siang (14:00 - 20:00)">Siang (14:00 - 20:00)</option>
+                                    </select>
+                                </div>
+                                <button type="button" class="btn btn-primary btn-block" onclick="alert('Identitas petugas diperbarui!'); document.getElementById('profile-name').textContent = document.getElementById('petugas-nama').value;">Simpan Identitas</button>
+                            </form>
+                        </div>
+                    </div>
+                </div>
+
+                <!-- Tab: Tanya Pustakawan -->
+                <div id="tanya-pustakawan" class="tab-content hidden">
+                    <div class="glass-panel catalog-section">
+                        <h3>Layanan Interaktif: Asisten AI Perpustakaan</h3>
+                        <p class="text-muted" style="margin-bottom: 20px;">Tanyakan ide penambahan buku, kategori populer, atau panduan sistem kepada Asisten AI kami.</p>
+                        
+                        <div class="chat-container" style="background: rgba(0,0,0,0.2); border-radius: 8px; height: 400px; padding: 20px; display:flex; flex-direction:column;">
+                            <div id="chat-messages" class="chat-messages" style="flex:1; overflow-y:auto; margin-bottom: 15px; display: flex; flex-direction: column; gap: 10px;">
+                                <div style="background: var(--panel-bg); padding: 10px 15px; border-radius: 8px; align-self: flex-start; max-width:80%;">
+                                    <strong>Asisten AI:</strong> Halo, Pustakawan! Ada yang bisa saya bantu hari ini? Misalnya Anda butuh ide buku baru untuk ditambahkan, ketik "Ide buku".
+                                </div>
+                            </div>
+                            <div class="chat-input" style="display:flex; gap:10px;">
+                                <input type="text" id="chat-input-field" placeholder="Ketik pesan Anda di sini..." style="flex:1;">
+                                <button id="chat-send-btn" class="btn btn-primary">Kirim</button>
+                            </div>
+                        </div>
+                    </div>
+                </div>
+
+            </main>
+        </section>
+    </div>
+
+    <!-- Modal Jurnal (Hidden by default) -->
+    <div id="journal-modal" class="modal hidden" style="position: fixed; top: 0; left: 0; width: 100%; height: 100%; background: rgba(0,0,0,0.6); z-index: 1000; display: flex; align-items: center; justify-content: center; backdrop-filter: blur(5px);">
+        <div class="glass-panel" style="width: 80%; max-width: 600px; position: relative;">
+            <button id="close-journal-modal" class="btn btn-outline btn-sm" style="position: absolute; right: 15px; top: 15px;">Tutup</button>
+            <h3 id="journal-modal-title" style="margin-bottom: 5px; padding-right: 50px;">Judul Jurnal</h3>
+            <p id="journal-modal-subtitle" class="text-muted" style="margin-bottom: 20px; font-size: 0.9em;">Sedang Mengunduh...</p>
+            <div id="journal-modal-content" style="background: rgba(0,0,0,0.2); padding: 15px; border-radius: 8px; max-height: 400px; overflow-y: auto; line-height: 1.6; text-align: justify;">
+                <p>Silakan tunggu, sedang memuat teori dan abstrak jurnal...</p>
+            </div>
+        </div>
+    </div>
+
+    <!-- Scripts -->
+    <script src="js/models/DataStructures.js"></script>
+    <script src="js/models/AppModel.js"></script>
+    <script src="js/views/AppView.js"></script>
+    <script src="js/controllers/AppController.js"></script>
+    <script src="js/main.js"></script>
+</body>
+</html>
